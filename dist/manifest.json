@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "LiveCommerce AI Shopping Copilot",
+  "version": "1.0.0",
+  "description": "Hands-free conversational shopping HUD powered by OpenAI Realtime and Universal Commerce Protocol (UCP).",
+  "permissions": [
+    "storage",
+    "tabs",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "LiveCommerce Settings"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "styles.css"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
+}
