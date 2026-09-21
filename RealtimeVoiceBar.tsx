@@ -59,7 +59,7 @@ export const RealtimeVoiceBar = forwardRef<RealtimeVoiceBarHandle, RealtimeVoice
   const animFrameRef = useRef<number | null>(null);
   const currentCallIdRef = useRef<string | null>(null);
 
-  // Auto-discover store's UCP on mount
+  // Auto-discover store's UCP and auto-resume session if active on mount
   useEffect(() => {
     discoverUcpStore().then((info) => {
       if (info) {
@@ -67,6 +67,14 @@ export const RealtimeVoiceBar = forwardRef<RealtimeVoiceBarHandle, RealtimeVoice
         console.log('[LiveCommerce] Discovered UCP Store:', info);
       }
     });
+
+    if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+      chrome.storage.local.get(['VOICE_SESSION_ACTIVE'], (res) => {
+        if (res.VOICE_SESSION_ACTIVE) {
+          startSession();
+        }
+      });
+    }
   }, []);
 
   // Clean teardown of media and WebRTC without wiping error state
@@ -101,6 +109,9 @@ export const RealtimeVoiceBar = forwardRef<RealtimeVoiceBarHandle, RealtimeVoice
     setCallId(null);
     currentCallIdRef.current = null;
     setErrorMessage(null);
+    if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+      chrome.storage.local.set({ VOICE_SESSION_ACTIVE: false });
+    }
   }, [cleanupResources]);
 
   // Waveform Drawer (Web Audio API AnalyserNode)
@@ -186,21 +197,17 @@ export const RealtimeVoiceBar = forwardRef<RealtimeVoiceBarHandle, RealtimeVoice
       drawWaveform();
 
       // 3. Target MCP endpoint and active store context
-      const activeEndpoint = mcpServerUrl || 'https://master-group-mcp.anigok.com/mcp';
+      const activeEndpoint = 'https://master-group-mcp.anigok.com/mcp';
       const currentHost = typeof window !== 'undefined' ? window.location.hostname : '';
       const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
-      const siteName = (typeof document !== 'undefined' && document.querySelector('meta[property="og:site_name"]')?.getAttribute('content')) || '';
       const pageTitle = typeof document !== 'undefined' ? document.title : '';
-      const cleanStoreName = storeInfo?.merchantName || siteName || pageTitle.split(/[-|–]/)[0].trim() || currentHost;
+      const cleanStoreName = storeInfo?.merchantName || currentHost;
 
-      const dynamicInstructions = `${SYSTEM_PROMPT}
+      const dynamicInstructions = currentHost ? `${SYSTEM_PROMPT}
 
-# CURRENT STORE CONTEXT
-- You are the conversational AI shopping concierge assisting a customer on "${cleanStoreName}" (${currentHost}).
-- Active URL: ${currentUrl}
-- Page Title: ${pageTitle}
-- When the user asks for products, recommendations, or questions, ALWAYS search this store's catalog using your hosted MCP tools.
-- Do NOT mention technical profile URLs, JSON schemas, or internal API instructions aloud to the customer. Speak concisely and naturally like a helpful in-store concierge for ${cleanStoreName}.`;
+# BROWSER CONTEXT
+- Current Store Domain: ${currentHost}
+- Current URL: ${currentUrl}` : SYSTEM_PROMPT;
 
       // 4. Define RealtimeAgent with tools and dynamic store prompt
       const agent = new RealtimeAgent({
@@ -210,13 +217,13 @@ export const RealtimeVoiceBar = forwardRef<RealtimeVoiceBarHandle, RealtimeVoice
           // Store's native MCP catalog connection
           hostedMcpTool({
             serverLabel: 'my_master_server',
-            serverUrl: activeEndpoint || 'https://master-group-mcp.anigok.com/mcp',
+            serverUrl: activeEndpoint,
             requireApproval: 'never',
           }),
           // Client tool: browser tab navigation
           tool({
             name: 'navigate_browser',
-            description: 'Navigates the user active browser tab to a specific product URL, cart page, or checkout URL.',
+            description: 'Navigates the user active browser tab to a specific product or category page. DO NOT navigate to checkout or cart when adding items or viewing the cart; the cart is displayed directly on screen in the LiveCommerce HUD.',
             parameters: z.object({
               url: z.string().describe('The URL to open in the active browser tab'),
             }).strict(),
@@ -317,6 +324,9 @@ export const RealtimeVoiceBar = forwardRef<RealtimeVoiceBarHandle, RealtimeVoice
       }
 
       setStatus('connected');
+      if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+        chrome.storage.local.set({ VOICE_SESSION_ACTIVE: true });
+      }
     } catch (err: any) {
       console.error('[RealtimeVoiceBar] Connection error:', err);
       const msg = err?.error?.message || err?.message || 'Failed to connect to OpenAI Realtime';

@@ -99,13 +99,6 @@ export const CommerceExtension: React.FC = () => {
         } else {
           window.location.href = continueUrl;
         }
-      } else {
-        const fallback = `${window.location.origin}/checkout`;
-        if (typeof chrome !== 'undefined' && chrome.runtime) {
-          chrome.runtime.sendMessage({ type: 'NAVIGATE_TAB', url: fallback });
-        } else {
-          window.location.href = fallback;
-        }
       }
       return;
     }
@@ -131,7 +124,7 @@ export const CommerceExtension: React.FC = () => {
     liveCommerceRef.current?.reset();
     setIsOpen(false);
     if (typeof chrome !== 'undefined' && chrome.storage?.local) {
-      chrome.storage.local.set({ COPILOT_ENABLED: false });
+      chrome.storage.local.set({ COPILOT_ENABLED: false, VOICE_SESSION_ACTIVE: false });
     }
   };
 

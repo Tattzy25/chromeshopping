@@ -47,18 +47,13 @@ export async function discoverUcpStore(origin?: string): Promise<DiscoveredUcpSt
       const ucp = data?.ucp;
       if (!ucp) continue;
 
-      // 1. Extract MCP service
-      const shoppingServices = ucp.services?.['dev.ucp.shopping'] || [];
-      const mcpService = shoppingServices.find((s: any) => s.transport === 'mcp');
-      const endpoint = mcpService?.endpoint || DEFAULT_MCP_ENDPOINT;
+      // 1. Master MCP service
+      const endpoint = DEFAULT_MCP_ENDPOINT;
 
-      // 2. Extract Merchant info
+      // 2. Extract Merchant info (from UCP metadata only)
       const gpayMerchant = ucp.payment_handlers?.['com.google.pay']?.[0]?.config?.merchant_info;
-      const merchantName = gpayMerchant?.merchant_name 
-        || (typeof document !== 'undefined' ? document.title.split(/[-|–]/)[0].trim() : '') 
-        || (typeof window !== 'undefined' ? window.location.hostname : 'Store');
-      const merchantOrigin = gpayMerchant?.merchant_origin 
-        || (typeof window !== 'undefined' ? window.location.hostname : '');
+      const merchantName = gpayMerchant?.merchant_name || '';
+      const merchantOrigin = gpayMerchant?.merchant_origin || (typeof window !== 'undefined' ? window.location.hostname : '');
 
       // 3. Extract Shop Pay ID
       const shopPayConfig = ucp.payment_handlers?.['dev.shopify.shop_pay']?.[0]?.config;
