@@ -21,9 +21,10 @@
  * and the container hugs however many products actually came back (1, 2, 3…).
  * Everything can be minimized to a pill or cleared with an X at any time.
  */
-import React, {
+import {
   forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState,
 } from 'react';
+
 import { AnimatePresence, motion } from 'motion/react';
 import {
   ChevronLeft, ChevronRight, ChevronDown, ChevronUp, X, Minus, Plus, Trash2,
@@ -315,9 +316,9 @@ const LiveCommerce = forwardRef<LiveCommerceHandle, LiveCommerceProps>(function 
       <AnimatePresence>
         {stage === 'discovery' && !minimized && (
           <motion.div
-            key="shelf" initial={{ x: '-50%', y: 24, opacity: 0 }} animate={{ x: '-50%', y: 0, opacity: 1 }} exit={{ x: '-50%', y: 24, opacity: 0 }}
+            key="shelf" initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 24, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 320, damping: 30 }}
-            className="pointer-events-auto fixed bottom-24 left-1/2 w-fit max-w-[min(94%,880px)] rounded-2xl border border-white/15 bg-black/90 p-2.5 shadow-[0_18px_50px_rgba(0,0,0,0.55)] backdrop-blur-xl z-[2147483647]"
+            className="pointer-events-auto absolute bottom-20 left-1/2 -translate-x-1/2 w-fit max-w-[min(94%,880px)] rounded-2xl border border-white/15 bg-black/80 p-2.5 shadow-[0_18px_50px_rgba(0,0,0,0.55)] backdrop-blur-xl"
           >
             <div className="flex items-center justify-between gap-3 px-1 pb-2">
               <span className="flex items-center gap-1.5 text-[10px] font-bold tracking-[0.18em] text-white/85">
@@ -368,8 +369,8 @@ const LiveCommerce = forwardRef<LiveCommerceHandle, LiveCommerceProps>(function 
         )}
 
         {stage === 'discovery' && minimized && (
-          <motion.div key="shelf-pill" initial={{ x: '-50%', y: 16, opacity: 0 }} animate={{ x: '-50%', y: 0, opacity: 1 }} exit={{ x: '-50%', y: 16, opacity: 0 }}
-            className="pointer-events-auto fixed bottom-24 left-1/2 flex items-center gap-2 rounded-full border border-white/15 bg-black/85 py-2 pl-4 pr-2 backdrop-blur-xl z-[2147483647]">
+          <motion.div key="shelf-pill" initial={{ y: 16, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 16, opacity: 0 }}
+            className="pointer-events-auto absolute bottom-20 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/15 bg-black/85 py-2 pl-4 pr-2 backdrop-blur-xl">
             <button type="button" onClick={() => setMinimized(false)}
               className="flex items-center gap-1.5 text-[10px] font-bold tracking-[0.14em] text-white/85">
               <ChevronUp size={13} />RESULTS · {products.length}
@@ -386,12 +387,12 @@ const LiveCommerce = forwardRef<LiveCommerceHandle, LiveCommerceProps>(function 
       <AnimatePresence>
         {(stage === 'detail' || stage === 'options') && active && (
           <motion.div key="detail" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="pointer-events-auto fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/75 p-4 backdrop-blur-md"
+            className="pointer-events-auto absolute inset-0 grid place-items-center bg-black/60 p-4 backdrop-blur-md"
             onClick={e => { if (e.target === e.currentTarget) act({ type: 'close' }); }}>
             <motion.div
               initial={{ scale: 0.92, y: 14 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0 }}
               transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-              className="flex max-h-[88vh] w-[min(94%,440px)] flex-col overflow-hidden rounded-3xl bg-zinc-50 text-zinc-900 shadow-2xl"
+              className="flex max-h-[88%] w-[min(94%,430px)] flex-col overflow-hidden rounded-3xl bg-zinc-50 text-zinc-900 shadow-2xl"
             >
               {/* sticky header: close is always reachable, never scrolled away */}
               <div className="flex items-center justify-between gap-2 border-b border-zinc-200 bg-zinc-50 px-3 py-2">
@@ -514,8 +515,8 @@ const LiveCommerce = forwardRef<LiveCommerceHandle, LiveCommerceProps>(function 
       {/* ── 4 · CART CONFIRMATION (compact, merchant-returned only) ──────── */}
       <AnimatePresence>
         {stage === 'cartConfirm' && cart && (
-          <motion.div key="confirm" initial={{ x: '-50%', y: 24, opacity: 0 }} animate={{ x: '-50%', y: 0, opacity: 1 }} exit={{ x: '-50%', y: 24, opacity: 0 }}
-            className="pointer-events-auto fixed bottom-24 left-1/2 w-[min(92%,440px)] rounded-2xl border border-white/15 bg-black/90 p-3 shadow-[0_18px_50px_rgba(0,0,0,0.55)] backdrop-blur-xl z-[2147483647]">
+          <motion.div key="confirm" initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 24, opacity: 0 }}
+            className="pointer-events-auto absolute bottom-20 left-1/2 w-[min(92%,440px)] -translate-x-1/2 rounded-2xl border border-white/15 bg-black/85 p-3 shadow-[0_18px_50px_rgba(0,0,0,0.55)] backdrop-blur-xl">
             <div className="flex items-center gap-3">
               <CheckCircle2 size={22} className="shrink-0 text-emerald-400" />
               <div className="min-w-0 flex-1">
@@ -555,10 +556,10 @@ const LiveCommerce = forwardRef<LiveCommerceHandle, LiveCommerceProps>(function 
       <AnimatePresence>
         {stage === 'cart' && cart && (
           <motion.div key="cart" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="pointer-events-auto fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/75 p-4 backdrop-blur-md"
+            className="pointer-events-auto absolute inset-0 grid place-items-center bg-black/60 p-4 backdrop-blur-md"
             onClick={e => { if (e.target === e.currentTarget) act({ type: 'close' }); }}>
             <motion.div initial={{ scale: 0.94, y: 12 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, opacity: 0 }}
-              className="flex max-h-[86vh] w-[min(94%,520px)] flex-col gap-3 overflow-hidden rounded-3xl border border-white/15 bg-zinc-950/95 p-4 backdrop-blur-xl">
+              className="flex max-h-[86%] w-[min(94%,520px)] flex-col gap-3 overflow-hidden rounded-3xl border border-white/15 bg-zinc-950/95 p-4 backdrop-blur-xl">
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-extrabold tracking-[0.06em]">YOUR BAG · {cartUnits} unit{cartUnits === 1 ? '' : 's'}</h2>
                 <button type="button" onClick={() => act({ type: 'close' })} aria-label="Close cart"
@@ -631,51 +632,56 @@ const LiveCommerce = forwardRef<LiveCommerceHandle, LiveCommerceProps>(function 
         )}
       </AnimatePresence>
 
-      {/* ── 6 · CHECKOUT CONTINUATION / REDIRECT ───────────────────────── */}
+      {/* ── 6 · CHECKOUT CONTINUATION / EMBED ───────────────────────────── */}
       <AnimatePresence>
         {stage === 'checkout' && checkout && (
           <motion.div key="checkout" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="pointer-events-auto fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md">
+            className="pointer-events-auto absolute inset-0 grid place-items-center bg-black/70 p-4 backdrop-blur-md">
             <motion.div initial={{ scale: 0.95, y: 12 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.97, opacity: 0 }}
-              className="flex max-h-[88vh] w-[min(94%,480px)] flex-col overflow-hidden rounded-3xl border border-white/15 bg-zinc-950 text-white shadow-2xl p-6 text-center gap-4">
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                <div className="flex items-center gap-2 text-emerald-400">
-                  <Store size={18} />
-                  <span className="text-xs font-extrabold tracking-wider uppercase text-white">Merchant Checkout</span>
-                </div>
-                <button type="button" onClick={() => act({ type: 'close' })} aria-label="Close"
-                  className="grid h-7 w-7 place-items-center rounded-full bg-white/10 hover:bg-white/20 text-white/80">
+              className="flex max-h-[88%] w-[min(96%,760px)] flex-col overflow-hidden rounded-3xl border border-white/15 bg-zinc-50 text-zinc-900 shadow-2xl">
+              <div className="flex items-center gap-3 bg-zinc-950 px-4 py-3 text-white">
+                <Store size={16} className="shrink-0 text-green-400" />
+                <span className="flex-1 truncate text-xs font-extrabold tracking-[0.08em]">MERCHANT CHECKOUT</span>
+                {checkout.progress.map(s => (
+                  <span key={s} className="rounded-full bg-white/10 px-2 py-0.5 text-[9.5px] font-bold">{s}</span>
+                ))}
+                <button type="button" onClick={() => act({ type: 'close' })} aria-label="Back to cart"
+                  className="grid h-7 w-7 place-items-center rounded-full bg-white/10 hover:bg-white/20">
                   <X size={14} />
                 </button>
               </div>
-
-              <div className="py-2">
-                <div className="mx-auto mb-3 grid h-14 w-14 place-items-center rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  <ShoppingBag size={26} />
+              {checkout.messages.length > 0 && (
+                <div className="border-b border-zinc-200 bg-amber-50 px-4 py-2 text-[11px] text-amber-800">
+                  {checkout.messages.join(' · ')}
                 </div>
-                <h3 className="text-base font-extrabold text-white">Ready for Checkout</h3>
-                <p className="mt-1 text-xs text-zinc-400 leading-relaxed max-w-sm mx-auto">
-                  {checkout.messages[0] ?? 'Complete your order directly and securely on the store.'}
-                </p>
-              </div>
-
-              <div className="flex flex-col gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => emit({ type: 'checkout', cartRaw: checkout.raw })}
-                  className="w-full rounded-2xl bg-white py-3.5 text-xs font-black text-black hover:bg-zinc-200 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg flex items-center justify-center gap-2"
-                >
-                  <span>Proceed to Store Checkout</span>
-                  <ExternalLink size={14} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => act({ type: 'close' })}
-                  className="w-full py-2 text-xs font-semibold text-zinc-400 hover:text-white transition-colors"
-                >
-                  Return to shopping
-                </button>
-              </div>
+              )}
+              {checkout.mode === 'iframe' && checkout.url ? (
+                <iframe src={checkout.url} title="Merchant checkout" allow="payment; autoplay; camera; microphone"
+                  className="min-h-[320px] w-full flex-1 border-0 bg-white" />
+              ) : (
+                <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
+                  <ExternalLink size={28} className="text-zinc-400" />
+                  <p className="max-w-sm text-xs leading-relaxed text-zinc-600">
+                    {checkout.messages[0] ?? 'The merchant handles checkout on their own surface.'}
+                  </p>
+                  {checkout.url && (
+                    <button type="button" onClick={() => emit({ type: 'checkout_action', actionRaw: { type: 'open_external', url: checkout.url, raw: checkout.raw } })}
+                      className="rounded-full bg-zinc-900 px-5 py-2.5 text-xs font-extrabold text-white hover:bg-zinc-800">
+                      Continue to merchant checkout
+                    </button>
+                  )}
+                </div>
+              )}
+              {checkout.buyerActions.length > 0 && (
+                <div className="flex flex-wrap gap-2 border-t border-zinc-200 bg-zinc-100 px-4 py-3">
+                  {checkout.buyerActions.map((a, i) => (
+                    <button key={i} type="button" onClick={() => emit({ type: 'checkout_action', actionRaw: a.raw })}
+                      className="rounded-full border border-zinc-300 bg-white px-4 py-2 text-xs font-bold text-zinc-700 hover:bg-zinc-100">
+                      {a.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}
@@ -685,9 +691,9 @@ const LiveCommerce = forwardRef<LiveCommerceHandle, LiveCommerceProps>(function 
       <AnimatePresence>
         {stage === 'complete' && order && (
           <motion.div key="complete" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="pointer-events-auto fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/75 p-4 backdrop-blur-md">
+            className="pointer-events-auto absolute inset-0 grid place-items-center bg-black/70 p-4 backdrop-blur-md">
             <motion.div initial={{ scale: 0.92 }} animate={{ scale: 1 }} exit={{ scale: 0.96, opacity: 0 }}
-              className={cx('flex w-[min(92%,400px)] flex-col items-center gap-3 overflow-y-auto rounded-3xl bg-zinc-50 p-6 text-center text-zinc-900 shadow-2xl max-h-[86vh]', NO_SB)}>
+              className={cx('flex w-[min(92%,400px)] flex-col items-center gap-3 overflow-y-auto rounded-3xl bg-zinc-50 p-6 text-center text-zinc-900 shadow-2xl max-h-[86%]', NO_SB)}>
               <CheckCircle2 size={44} className="text-emerald-500" />
               <h2 className="text-lg font-black">Order complete</h2>
               {order.id && <div className="rounded-full bg-zinc-200 px-3 py-1 font-mono text-[11px] font-bold text-zinc-700">{order.id}</div>}
@@ -726,8 +732,8 @@ const LiveCommerce = forwardRef<LiveCommerceHandle, LiveCommerceProps>(function 
       {/* ── toast (merchant messages) ───────────────────────────────────── */}
       <AnimatePresence>
         {toast && (
-          <motion.div key="toast" initial={{ x: '-50%', y: -14, opacity: 0 }} animate={{ x: '-50%', y: 0, opacity: 1 }} exit={{ x: '-50%', y: -14, opacity: 0 }}
-            className="pointer-events-none absolute left-1/2 top-5 rounded-full bg-white px-4 py-2 text-xs font-bold text-zinc-900 shadow-xl">
+          <motion.div key="toast" initial={{ y: -14, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -14, opacity: 0 }}
+            className="pointer-events-none absolute left-1/2 top-5 -translate-x-1/2 rounded-full bg-white px-4 py-2 text-xs font-bold text-zinc-900 shadow-xl">
             {toast}
           </motion.div>
         )}

@@ -51,6 +51,11 @@ export function routeResult(raw: Raw, hint?: { view?: View }): RoutedResult {
     (has(raw, ['order', 'order_confirmation']) && /complet|confirm|success|placed/i.test(String(pick(raw, ['status', 'state', 'stage'], false) ?? '')));
   if (orderish) return fill(base, 'complete');
 
+  const checkoutish =
+    has(raw, ['checkout_url', 'checkoutUrl', 'continuation_url', 'continuationUrl', 'embed_url', 'embedUrl', 'iframe_url', 'checkout', 'checkout_state']) ||
+    nk(String(pickShallow(raw, ['stage', 'state']) ?? '')) === 'checkout';
+  if (checkoutish) return fill(base, 'checkout');
+
   const cartish =
     has(raw, ['cart', 'cart_state', 'line_items', 'lineItems', 'lines', 'totals', 'bag']) &&
     (has(raw, ['lines', 'line_items', 'lineItems', 'items', 'totals', 'cart']) );
@@ -59,11 +64,6 @@ export function routeResult(raw: Raw, hint?: { view?: View }): RoutedResult {
       /added|confirmed|success/i.test(String(pick(raw, ['status', 'message'], false) ?? ''));
     return fill(base, confirmish ? 'cartConfirm' : 'cart');
   }
-
-  const checkoutish =
-    has(raw, ['checkout_url', 'checkoutUrl', 'continuation_url', 'continuationUrl', 'embed_url', 'embedUrl', 'iframe_url', 'checkout', 'checkout_state']) ||
-    nk(String(pickShallow(raw, ['stage', 'state']) ?? '')) === 'checkout';
-  if (checkoutish) return fill(base, 'checkout');
 
   const single = pickShallow(raw, ['product', 'item', 'product_detail', 'detail']);
   if (single && typeof single === 'object' && !Array.isArray(single) &&

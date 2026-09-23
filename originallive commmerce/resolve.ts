@@ -332,10 +332,22 @@ export function normalizeProduct(raw: Raw, i = 0): Product {
   };
 }
 export function resolveProducts(raw: Raw): Product[] {
-  const arr = pick(raw, ['products', 'results', 'items', 'product_list', 'productList', 'catalog', 'records', 'entries', 'listings', 'offers', 'search_results', 'searchResults'], false)
-    ?? pickDeep(raw, ['products', 'results', 'items', 'listings', 'offers'], 3);
+  let arr = pick(raw, ['products', 'results', 'items', 'product_list', 'productList', 'records', 'entries', 'listings', 'offers', 'search_results', 'searchResults'], false);
+  if (!Array.isArray(arr) && isObj(arr)) {
+    arr = pick(arr, ['products', 'results', 'items', 'listings', 'offers'], false);
+  }
+  if (!Array.isArray(arr)) {
+    const cat = pick(raw, ['catalog', 'data', 'response', 'payload'], false);
+    if (isObj(cat)) {
+      arr = pick(cat, ['products', 'results', 'items', 'listings', 'offers'], false);
+    }
+  }
+  if (!Array.isArray(arr)) {
+    arr = pickDeep(raw, ['products', 'results', 'items', 'listings', 'offers'], 4);
+  }
   if (Array.isArray(arr)) return arr.map((x, i) => normalizeProduct(x, i));
-  const single = pickShallow(raw, ['product', 'item', 'detail', 'product_detail']);
+  const single = pickShallow(raw, ['product', 'item', 'detail', 'product_detail'])
+    ?? (isObj(raw) && isObj(raw.catalog) ? pickShallow(raw.catalog, ['product', 'item', 'detail', 'product_detail']) : null);
   if (isObj(single)) return [normalizeProduct(single)];
   return [];
 }
